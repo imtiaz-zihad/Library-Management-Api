@@ -9,3 +9,10 @@ export interface  IBook {
     copies: number;
     available: boolean;
 }
+
+export interface bookMethod extends Model<IBook> {
+    borrowQuantity(quantity: number): void;
+}
+
+
+export type BookModel = Model<IBook, {}, bookMethod>;
