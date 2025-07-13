@@ -3,7 +3,10 @@
 A simple and scalable RESTful API for managing library books and borrowing operations. Built with **Node.js**, **TypeScript**, **Express**, and **MongoDB** using **Mongoose**.
 
 ---
-
+# Related Links
+* [Frontend Repository](https://github.com/imtiaz-zihad/Library-Management-Frontend)
+*  [Frontend link](https://library-management-frontend-site.vercel.app)
+*  [Live link](https://libary-management-system-ten.vercel.app)
 
 ## 📌 Introduction
 
