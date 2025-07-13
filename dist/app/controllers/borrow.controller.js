@@ -12,16 +12,58 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.borrowRoutes = void 0;
+exports.borrowRoute = void 0;
 const express_1 = __importDefault(require("express"));
-const book_model_1 = require("../models/book.model");
 const borrow_model_1 = require("../models/borrow.model");
-exports.borrowRoutes = express_1.default.Router();
-// Borrow a Book
-exports.borrowRoutes.post("/borrow", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const book_model_1 = require("../models/book.model");
+exports.borrowRoute = express_1.default.Router();
+// Borrow get
+exports.borrowRoute.get("/borrow", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const books = yield borrow_model_1.Borrow.aggregate([
+            {
+                $group: {
+                    _id: "$book",
+                    totalQuantity: { $sum: "$quantity" }
+                }
+            },
+            {
+                $lookup: {
+                    from: "books",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "bookInfo"
+                }
+            },
+            { $unwind: "$bookInfo" },
+            {
+                $project: {
+                    book: {
+                        title: "$bookInfo.title",
+                        isbn: "$bookInfo.isbn"
+                    },
+                    totalQuantity: 1
+                }
+            }
+        ]);
+        res.status(200).json({
+            success: true,
+            message: "Borrowed books summary retrieved successfully",
+            data: books,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to retrieve books",
+            error,
+        });
+    }
+}));
+// Borrow post
+exports.borrowRoute.post("/borrow", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { book, quantity, dueDate } = req.body;
-        console.log("Borrow request received:", req.body);
         const data = yield book_model_1.Book.findOne({ _id: book });
         if (!data) {
             res.status(404).json({
@@ -65,52 +107,5 @@ exports.borrowRoutes.post("/borrow", (req, res) => __awaiter(void 0, void 0, voi
                 error,
             });
         }
-    }
-}));
-// Return a Book
-exports.borrowRoutes.get("/borrow", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const books = yield borrow_model_1.Borrow.aggregate([
-            {
-                $group: {
-                    _id: "$book",
-                    totalQuantity: { $sum: "$quantity" },
-                },
-            },
-            {
-                $lookup: {
-                    from: "books",
-                    localField: "_id",
-                    foreignField: "_id",
-                    as: "bookDetails",
-                },
-            },
-            {
-                $unwind: "$bookDetails",
-            },
-            {
-                $project: {
-                    _id: 0,
-                    book: {
-                        title: "$bookDetails.title",
-                        isbn: "$bookDetails.isbn",
-                    },
-                    totalQuantity: 1,
-                },
-            },
-        ]);
-        res.status(200).json({
-            success: true,
-            message: "Borrowed books summary retrieved successfully",
-            books,
-        });
-    }
-    catch (error) {
-        console.error("Error returning book:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to return book",
-            error: error.message || "Something went wrong",
-        });
     }
 }));

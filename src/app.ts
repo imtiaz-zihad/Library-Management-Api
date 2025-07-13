@@ -1,18 +1,24 @@
-import express ,{Application, Request, Response} from 'express';
-import { bookRoutes } from './app/controllers/book.controller';
-import { borrowRoutes } from './app/controllers/borrow.controller';
+import  cors  from 'cors';
+
+import express, { Application, Request, Response } from "express";
+import { bookRouter } from "./app/controllers/book.controller";
+import { borrowRoute } from "./app/controllers/borrow.controller";
 
 const app: Application = express();
 
-// Middleware to parse JSON bodies
 app.use(express.json());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://bookbase-lake.vercel.app"],
+    credentials: true,
+  })
+);
 
-
-app.use("/api", bookRoutes);
-app.use("/api", borrowRoutes);
+app.use("/api", bookRouter);
+app.use("/api", borrowRoute);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Welcome to the Library Management System!");
+  res.send("Library Management System API is running successfully!");
 });
 
 export default app;
